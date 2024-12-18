@@ -3,6 +3,7 @@ const path = require('path')
 const {Device, DeviceInfo} = require('../models/models')
 const ApiError = require('../error/ApiError');
 const { title } = require('process');
+const fs = require('fs')
 
 class DeviceController{
     async create(req, res, next){
@@ -11,7 +12,19 @@ class DeviceController{
             const {name, price, brandId, typeId, info} = req.body
             const {img} = req.files
             let fileName = uuidv4() + '.jpg'
-            img.mv(path.resolve(__dirname, '..', 'static', fileName) )
+
+            const staticDir = path.resolve(__dirname, '..', 'static');
+
+            if (!fs.existsSync(staticDir)) {
+                fs.mkdirSync(staticDir, { recursive: true });
+            }
+            img.mv(path.resolve(staticDir, fileName), (err) => {
+                if (err) {
+                    console.error('Error moving file:', err);
+                    return res.status(500).send(err);
+                }
+                res.send('File uploaded!');
+            } )
     
      
 
